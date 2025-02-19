@@ -178,6 +178,5 @@ flowchart LR
     B
     end
 ```
-
-**Mathematical Insight**:  
+ 
 ENN implements a form of low-pass filtering. For a point $x_i$, if $\hat{y}_i \neq y_i$ where $\hat{y}_i = \text{majority}(k\text{-NN}(x_i))$, then $x_i$ is considered noise. This follows from the smoothness assumption in machine learning: similar instances should have similar labels.

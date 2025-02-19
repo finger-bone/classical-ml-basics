@@ -1,0 +1,65 @@
+---
+sidebar_position: 1
+---
+
+# PCA
+
+PCA means principal component analysis. It is a technique used to reduce the dimensionality of the dataset.
+
+The idea is very simple, consider a dataset matrix,
+
+$$
+X = (x_1, x_2, \ldots, x_n)^T
+$$
+
+We would like to retain the dimension that captures the most variance in the dataset.
+
+Consider the covariance matrix, $C = (X - \overline{X})^T(X - \overline{X})$ where $\overline{X} = (\overline{x}, \overline{x}, \ldots, \overline{x})^T$. Because we want maximum variance for each dimension, we can perform an eigendecomposition of the covariance matrix.
+
+$$
+C = V \Lambda V^T
+$$
+
+We will use $V$ as the new basis for each $x$ data vector. So their variance can be measured by their eigenvalues. Those with higher eigenvalues are the principal components.
+
+We can set a threshold or set a fixed number of principal components to keep. Then we can finish the feature reduction.
+
+:::info
+
+The above process can also be seen as SVD on the dataset matrix $X$.
+
+From the SVD perspective, the principal components are the left singular vectors of $X$. The eigenvalues of the covariance matrix are the square of the singular values of $X$. We look for the singular vectors that has the largest absolute singular values, then cast the data into the reduced singular vector space.
+
+:::
+
+:::tip
+
+Singular Value Decomposition refers to decomposing a matrix into,
+
+$$
+X = U \Sigma V^T
+$$
+
+Where $U$ and $V$ are orthogonal matrices and $\Sigma$ is a diagonal matrix. This is a natural extension of the eigendecomposition of a square matrix.
+
+$U$ and $V$ are the left and right singular vectors of $X$ respectively. $\Sigma$ is the singular values of $X$. For a square matrix, the singular values are the eigenvalues.
+
+$U$ is responsible for rotating the vector into a proper basis, then $Sigma$ brings the space into a another dimension while performing a stretch, then $V$ rotates the target space.
+
+To calculate the SVD,
+
+$$
+X^T X = V \Sigma^2 V^T
+$$
+
+Because $X^T X$ is a square matrix, it has an eigendecomposition. The eigenvectors of $X^T X$ are the right singular vectors of $X$. The eigenvalues of $X^T X$ are the square of the singular values of $X$.
+
+Similarly,
+
+$$
+X X^T = U \Sigma^2 U^T
+$$
+
+Thus we can calculate the singular values and vectors of $X$.
+
+:::
