@@ -303,3 +303,31 @@ $$
 The final inequation an be achieved using penalty method or simply, force $\alpha_i$ to be zero if it is negative after an update.
 
 A faster way to calculate is called the SMO algorithm, which is a more efficient way to optimize the SVM loss function. It's basic idea is to update the $\alpha_i$ in pairs that violates the KKT condition most. We aren't going through it here.
+
+## Non-Linear SVM
+
+SVM can only distinguish linearly separable data. To handle non-linear data, we can use the kernel trick.
+
+For a $n$ dimensional data, it is guaranteed to exist a $n+1$ dimensional hyperplane that can separate the data. So, we can use a function $\phi(x)$ to map the data to a higher dimensional space, then the hyperplane becomes,
+
+$$
+\phi(w)^T \phi(x) + b = 0
+$$
+
+The other part of the SVM algorithm remains the same.
+
+However, because we eventually will cast the high dimensional data back to the original space, we can use the kernel trick to avoid the explicit calculation of $\phi(x)$. That is, we define a new inner product, $K(x, x') = \phi(x)^T \phi(x')$. This is called a kernel function.
+
+Then, with everything else remains the same, when we calculate the inner product, we use the non-linear kernel function instead of the original inner product.
+
+:::info
+
+Common kernel functions include,
+
+- Plain kernel: $K(x, x') = x^T x'$
+- Polynomial kernel: $K(x, x') = (x^T x' + c)^d$
+- Gaussian kernel: $K(x, x') = exp(-\frac{||x - x'||^2}{2\sigma^2})$
+- Sigmoid kernel: $K(x, x') = tanh(\alpha x^T x' + c)$
+- Laplace kernel: $K(x, x') = exp(-\frac{||x - x'||}{\sigma})$
+
+:::
