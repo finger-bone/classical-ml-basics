@@ -27,7 +27,7 @@ $$
 By best fit, we typically mean to minimize a loss value.
 
 $$
-f = min_{f \in \mathcal{F}} \frac{1}{n}  \sum_{i=1}^{n} L(y_i, f(x_i))
+f = argmin_{f \in \mathcal{F}} \frac{1}{n}  \sum_{i=1}^{n} L(y_i, f(x_i))
 $$
 
 Generalized Linear Regression mainly contains, the linear regression, logistic regression, and regularized regression (L1, L2, Elastic Net, etc). They are all variations of the linear regression.
@@ -172,9 +172,7 @@ print(predict([[6, 7], [7, 8]], w, b))
 
 ## Logistic Regression
 
-Logistic regression is a bit more robust than linear regression. It works good on data that seems linear yet not linear enough for linear regression.
-
-Logistic Regression use function space,
+Logistic regression is a variation of linear regression. It uses function space,
 
 $$
 \hat{y} = \sigma(w^Tx + b)
@@ -250,11 +248,6 @@ Take note that $\lambda C_1$ and $\mu C_2$ are irrelevant to the solution, so we
 The form introduced in this section is called the constrain form, and the form introduced in the previous section is called the penalty form.
 
 :::
-
-
-$$
-L = \frac{1}{n} \sum_{i=1}^{n} (y_i - (w^T x_i + b))^2 + \lambda ||w||_1 + \mu ||w||_2^2 \\ \; s.t. \; \lambda, \mu > 0
-$$
 
 We can solve this by gradient descent,
 
