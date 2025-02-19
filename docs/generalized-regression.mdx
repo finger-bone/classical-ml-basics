@@ -42,7 +42,7 @@ $$
 \hat{y} = \hat{w}^Tx+\hat{b}
 $$
 
-:::note
+:::tip
 
 You may see the following in other books,
 
@@ -133,12 +133,12 @@ $$
 w^T = ({\overline{x^Ty} - \overline{x^T} \; \overline{y}})(\overline{xx^T} - \overline{x}\; \overline{x}^T)^{-1}
 $$
 
-:::note
+:::tip
 
 For homogeneous coordinates,
 
 $$
-w^T = (\overline{xx^T}) ^ {-1} \overline{yx}
+w^T = \overline{yx} (\overline{xx^T}) ^ {-1}
 $$
 
 :::
@@ -182,7 +182,7 @@ $$
 
 Where $\sigma(z) = \frac{1}{1+e^{-z}}$ is the sigmoid function.
 
-:::note
+:::tip
 
 Sigmoid function has some special properties,
 
@@ -207,7 +207,7 @@ Sometimes, we add extra regularization terms to loss function to reduce overfit 
 If we add L1 regulation, that is,
 
 $$
-L = \frac{1}{n} \sum_{i=1}^{n} (y_i - (w^Tx_i + b))^2 + \lambda ||w||_1
+L = \frac{1}{n} \sum_{i=1}^{n} (y_i - (w^Tx_i + b))^2 + \lambda ||w||_1 \; s.t. \; \lambda > 0
 $$
 
 This would make the weight more sparse, which is good for feature selection.
@@ -215,9 +215,53 @@ This would make the weight more sparse, which is good for feature selection.
 If we add L2 regulation, that is,
 
 $$
-L = \frac{1}{n} \sum_{i=1}^{n} (y_i - (w^T x_i + b))^2 + \lambda ||w||_2^2
+L = \frac{1}{n} \sum_{i=1}^{n} (y_i - (w^T x_i + b))^2 + \lambda ||w||_2^2 \; s.t. \; \lambda > 0
 $$
 
 This would make the weight smaller, which is good for reducing overfit.
 
 Linear regression with L1 regularization is called Lasso regression, and with L2 regularization is called Ridge regression. If we combine them, it is called an Elastic Net.
+
+$$
+L = \frac{1}{n} \sum_{i=1}^{n} (y_i - (w^T x_i + b))^2 + \lambda ||w||_1 + \mu ||w||_2^2 \\ \; s.t. \; \lambda, \mu > 0
+$$
+
+:::info
+
+Another way of introducing regularization terms.
+
+Consider the following lagrange problem,
+
+$$
+argmin_{w^T, b} \frac{1}{n} \sum_{i=1}^{n} (y_i - (w^Tx_i + b))^2 \\
+s.t. \; ||w||_1 - C_1 <= 0 \\
+||w||_2^2 - C_2 <= 0
+$$
+
+We can use the lagrange multiplier to solve this problem.
+
+$$
+L = \frac{1}{n} \sum_{i=1}^{n} (y_i - (w^Tx_i + b))^2 + \lambda (||w||_1 - C_1) + \mu (||w||_2^2 - C_2)\\
+s.t. \; \lambda, \mu >= 0
+$$
+
+Take note that $\lambda C_1$ and $\mu C_2$ are irrelevant to the solution, so we can simply remove them to get the final form.
+
+The form introduced in this section is called the constrain form, and the form introduced in the previous section is called the penalty form.
+
+:::
+
+
+$$
+L = \frac{1}{n} \sum_{i=1}^{n} (y_i - (w^T x_i + b))^2 + \lambda ||w||_1 + \mu ||w||_2^2 \\ \; s.t. \; \lambda, \mu > 0
+$$
+
+We can solve this by gradient descent,
+
+$$
+\frac{\partial L}{\partial w^T} = \frac{1}{n} \sum_{i=1}^{n} -2x_i(y_i - (w^Tx_i + b)) + \lambda sign(w) + 2\mu w
+$$
+
+$$
+\frac{\partial L}{\partial b} = \frac{1}{n} \sum_{i=1}^{n} -2(y_i - (w^Tx_i + b))
+$$
