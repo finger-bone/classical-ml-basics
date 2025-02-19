@@ -1,0 +1,305 @@
+---
+sidebar_position: 2
+---
+
+# Support Vector Machine
+
+Support vector machine is a natural deviation from the linear regression model. In linear regression, we try to fit a line that best fits the data points. In support vector machine, we try to fit a line that best separates the data points.
+
+We use,
+
+$$
+\mathbb{B} = \{-1,1\}
+$$
+
+Here.
+
+## Ideas
+
+For support vector machine, we want to have a plane,
+
+$$
+w^T x + b = 0
+$$
+
+That is optimal for splitting the space into two regions, the upper part $w^T x + b > 0$ and the lower part $w^T x + b < 0$.
+
+We would like to have least wrongly classified points and the maximum margin between the two regions. The margin means $\epsilon$ such that, there are as few points as possible in the region 
+
+$$
+\frac{||w^T x + b||_2}{||w||_2} < \epsilon
+$$
+
+So that there could be fewer points close to the plane, which makes the classification more robust.
+
+To do the prediction,
+
+$$
+\hat{y} = sgn(w^T x + b)
+$$
+
+:::tip
+
+For a high dimensional plane $w^T x + b = 0$, the $w^T$ is the normal vector of the plane because, for any two point $x_1$ and $x_2$ on the plane, $w^T (x_1 - x_2) = 0$ (by subtracting $w^T x_1 + b = 0$ and $w^T x_2 + b = 0$).
+
+:::
+
+:::tip
+
+For a high dimensional plane $w^T x + b = 0$, the distance from any point $x_0$ to the plane is,
+
+$$
+\frac{||w^T x_0 + b||}{||w||_2}
+$$
+
+You can directly extrapolate this from low dimensional space. But we need more valid proof for this.
+
+The distant from a point to a plane is defined as the minimum distance from the given point to any point on the plane. That is to say,
+
+$$
+D = min_x ||x - x_0||_2 \; s.t. \; w^T x + b = 0
+$$
+
+This function is kind of hard to optimize, we use an equivalent function,
+
+$$
+\frac{1}{2} D^2 = min_x \frac{1}{2}||x - x_0||_2^2 \; s.t. \; w^T x + b = 0
+$$
+
+Construct a lagrangian,
+
+$$
+L(x, \lambda) = \frac{1}{2}||x - x_0||_2^2 + \lambda (w^T x + b)
+$$
+
+Then,
+
+$$
+\frac{\partial L}{\partial x} = (x - x_0)^T + \lambda w^T = 0
+$$
+
+$$
+\frac{\partial L}{\partial \lambda} = w^T x + b = 0
+$$
+
+Because we are in the Euclidean space,
+
+$$
+x - x_0 + \lambda w = 0
+$$
+
+Then,
+
+$$
+w^Tx - w^Tx_0 + \lambda w^Tw = 0
+$$
+
+$$
+\lambda = \frac{w^Tx_0 + b}{||w||_2^2}
+$$
+
+Now we have $\lambda$ , we substitute it back to the first equation,
+
+$$
+(x - x_0) = - \frac{w(w^Tx + b)}{||w||_2^2}
+$$
+
+Thus,
+
+$$
+D = ||x - x_0||_2 = \frac{||w^Tx + b||}{||w||_2}
+$$
+
+:::
+
+## Mathematical Formulation
+
+We rewrite our optimization problem in a more mathematical way,
+
+Because we want maximum margin and maximum correctly classified points that is to say we would like to minimize,
+
+$$
+L = \sum_{i=1}^{n} \max(0, 
+\epsilon - \frac{y_i(w^T x_i + b)}{||w^T||_2})
+$$
+
+With a given $\epsilon$ range, for example,
+
+$$
+\epsilon \leq \epsilon_0
+$$
+
+:::tip
+
+If the classification is wrong,
+
+$$
+y_i(w^T x_i + b) < 0
+$$
+
+Thus there will be more loss.
+
+And if the classification is correct, but it is not far enough from the plane with a distance of $\epsilon$, then,
+
+$$
+\frac{y_i(w^T x_i + b)}{||w^T||_2} < \epsilon
+$$
+
+Which results in more loss.
+
+Only if the sample is correctly classified and is far enough from the plane with a distance $\epsilon$, the loss will be zero.
+
+:::
+
+:::info
+
+There are two types of SVM, the soft margin SVM and the hard margin SVM. We use the soft margin SVM here.
+
+Hard margin SVM supposes that there must exists such a line that can separate the two classes perfectly, so, they use loss function,
+
+$$
+L = - \frac{1}{||w||_2} \; s.t. \; y_i(w^Tx + b) > 0
+$$
+
+Or even,
+
+$$
+L = ||w||_2^2 \; s.t. \; y_i(w^Tx + b) > 0
+$$
+
+Because such a set of $w^T$ and $b$ is guaranteed to exist, this loss function only optimize the margin.
+
+But if it's not the case, we use soft margin SVM, which minimize the wrongly classified points and maximize the margin, which is shown here.
+
+:::
+
+## Optimization
+
+To optimize the loss function, we first need to reduce the $max$ function. We can use the following trick called slack variable,
+
+$$
+L = \sum_{i=1}^{n} \xi_i \\
+s.t. \; \frac{y_i(w^T x_i + b)}{\epsilon ||w^T||_2} \geq 1 - \xi_i \\
+\xi_i \geq 0 \\
+\epsilon \leq \epsilon_0
+$$
+
+:::info
+
+This form in my note looks very different from other forms you may see in the textbook, which is,
+
+$$
+L = \frac{1}{2} ||w||_2^2 + C \sum_{i=1}^{n} \xi_i \\
+s.t. \; y_i(w^T x_i + b) \geq 1 - \xi_i \\
+\xi_i \geq 0 \\
+$$
+
+However, they are fundamentally identical.
+
+This is our form,
+
+$$
+L = \sum_{i=1}^{n} \xi_i \\
+s.t. \; \frac{y_i(w^T x_i + b)}{\epsilon ||w^T||_2} \geq 1 - \xi_i \\
+\xi_i \geq 0 \\
+\epsilon \leq \epsilon_0
+$$
+
+If we enforce an extra restriction $\epsilon ||w^T||_2 = 1$ , then,
+
+$$
+L = \sum_{i=1}^{n} \xi_i \\
+s.t. \; y_i(w^T x_i + b) \geq 1 - \xi_i \\
+\xi_i \geq 0 \\
+||w^T||_2 \geq \frac{1}{\epsilon_0}
+$$
+
+We can use lagrange multiplier to the last equation, then,
+
+$$
+L = \sum_{i=1}^{n} \xi_i + \lambda (||w^T||_2 - \frac{1}{\epsilon_0})
+$$
+
+Again, $\lambda \frac{1}{\epsilon_0}$ doesn't effect the loss function. And eventually, 
+
+$$
+L = \lambda ||w^T||_2 + \sum_{i=1}^{n} \xi_i \\
+s.t. \; y_i(w^T x_i + b) \geq 1 - \xi_i \\
+\xi_i \geq 0 \\
+$$
+
+This is identical to the traditional form, except that the coefficient is expressed in a different way.
+
+You will later see that, if we take $\epsilon_0 = \frac{1}{||w^T||_2}$ , the optimization step is exactly identical in both forms.
+
+:::
+
+Rewrite it in the lagrange form,
+
+$$
+L = \sum_{i=1}^{n} \xi_i \\
+s.t. \; 1 - \xi_i - \frac{y_i(w^T x_i + b)}{\epsilon ||w^T||_2} \leq 0 \\
+- \xi_i \leq 0 \\
+\epsilon - \epsilon_0 \leq 0
+$$
+
+Then use lagrange multiplier,
+
+$$
+L = \sum_{i=1}^{n} \xi_i + \sum_{i=1}^{n} \alpha_i (1 - \xi_i - \frac{y_i(w^T x_i + b)}{\epsilon ||w^T||_2}) + \sum_{i=1}^{n} \beta_i (- \xi_i) + \gamma (\epsilon - \epsilon_0) \\
+s.t. \; \alpha_i \geq 0 \\
+\beta_i \geq 0 \\
+\gamma \geq 0
+$$
+
+Before using gradient descent, we can do some simplification, because,
+
+$$
+\frac{\partial L}{\partial \xi_i} = 1 - \alpha_i - \beta_i
+$$
+
+So,
+
+$$
+L = \sum_{i=1}^{n} \alpha_i (1 - \frac{y_i(w^T x_i + b)}{\epsilon ||w^T||_2}) + \gamma (\epsilon - \epsilon_0) \\
+$$
+
+We can further reduce $\gamma$,
+
+$$
+L = \sum_{i=1}^{n} \alpha_i (1 - \frac{y_i(w^T x_i + b)}{\epsilon_0 ||w^T||_2}) 
+$$
+
+Typically, we use,
+
+$$
+\epsilon_0 = \frac{1}{||w^T||_2}
+$$
+
+So, 
+
+$$
+L = \sum_{i=1}^{n} \alpha_i (1 - y_i(w^T x_i + b))
+$$
+
+Eventually,
+
+$$
+\frac{\partial L}{\partial \alpha_i} = 1 - y_i(w^T x_i + b)
+$$
+
+$$
+\frac{\partial L}{\partial w^T} = \sum_{i=1}^{n} \alpha_i y_i x_i
+$$
+
+$$
+\frac{\partial L}{\partial b} = \sum_{i=1}^{n} \alpha_i y_i
+$$
+
+$$
+\alpha_i \geq 0
+$$
+
+The final inequation an be achieved using penalty method or simply, force $\alpha_i$ to be zero if it is negative after an update.
+
+A faster way to calculate is called the SMO algorithm, which is a more efficient way to optimize the SVM loss function. It's basic idea is to update the $\alpha_i$ in pairs that violates the KKT condition most. We aren't going through it here.
