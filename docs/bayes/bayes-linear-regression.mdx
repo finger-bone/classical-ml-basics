@@ -1,0 +1,123 @@
+---
+sidebar_position: 2
+---
+
+# Bayes Linear Regression
+
+Similar to Bayes Classification, Bayes Linear Regression combines Bayes' Theorem with linear regression. Instead of directly providing point estimates for the model parameters (such as the coefficients in linear regression), this method provides a probabilistic distribution for these parameters, incorporating uncertainty in the model.
+
+## Mathematical Formulation
+
+We begin with a linear regression model for $y$ (the target variable) given $X$ (the feature matrix):
+
+$$
+y = X \beta + \epsilon
+$$
+
+where:
+- $y$ is the $n \times 1$ vector of observed values,
+- $X$ is the $n \times p$ matrix of input features (where $n$ is the number of observations, and $p$ is the number of features),
+- $\beta$ is the $p \times 1$ vector of unknown regression coefficients (parameters),
+- $\epsilon$ is the $n \times 1$ vector of errors, typically assumed to be independent and identically distributed from a normal distribution, $\epsilon \sim \mathcal{N}(0, \sigma^2 I)$.
+
+### Prior Distribution
+In Bayes Linear Regression, we assume a prior distribution for the parameters $\beta$. A common choice is to assume a **Gaussian prior** on the coefficients:
+
+$$
+\beta \sim \mathcal{N}(0, \tau^2 I)
+$$
+
+where $\tau^2$ is the prior variance that controls the uncertainty about the parameters. This prior expresses the belief that the coefficients $\beta$ are likely to be near zero but with some variability.
+
+### Likelihood Function
+Given the assumption of normally distributed errors, the likelihood function for the observed data $y$ given $X$ and $\beta$ is:
+
+$$
+p(y | X, \beta, \sigma^2) = \mathcal{N}(y | X\beta, \sigma^2 I)
+$$
+
+This represents the probability of observing $y$ given the inputs $X$ and the parameters $\beta$, with noise variance $\sigma^2$.
+
+### Posterior Distribution
+By Bayes' Theorem, the **posterior distribution** of $\beta$ given the data $(X, y)$ is proportional to the product of the prior and the likelihood:
+
+$$
+p(\beta | X, y) \propto p(y | X, \beta, \sigma^2) p(\beta)
+$$
+
+Substituting the expressions for the likelihood and prior:
+
+$$
+p(\beta | X, y) \propto \exp\left(-\frac{1}{2\sigma^2} (y - X\beta)^T(y - X\beta)\right) \exp\left(-\frac{1}{2\tau^2} \beta^T \beta \right)
+$$
+
+This is a Gaussian distribution with the following mean and covariance.
+
+### Posterior Mean and Covariance
+After completing the algebra, we arrive at the following **posterior distribution** for $\beta$:
+
+$$
+p(\beta | X, y) = \mathcal{N}(\beta | \hat{\beta}_{\text{post}}, \Sigma_{\text{post}})
+$$
+
+where:
+- $\hat{\beta}_{\text{post}} = (\sigma^2 X^T X + \tau^2 I)^{-1} X^T y$ is the **posterior mean**, which is a weighted combination of the least-squares estimate and the prior information,
+- $\Sigma_{\text{post}} = (\sigma^2 X^T X + \tau^2 I)^{-1}$ is the **posterior covariance**, which indicates the uncertainty about the regression parameters after observing the data.
+
+### Prediction
+The predictive distribution for a new observation $x_{\text{new}}$ is given by:
+
+$$
+p(y_{\text{new}} | x_{\text{new}}, X, y) = \int p(y_{\text{new}} | x_{\text{new}}, \beta) p(\beta | X, y) d\beta
+$$
+
+This integral can be evaluated, leading to a **Gaussian** distribution for the prediction:
+
+$$
+p(y_{\text{new}} | x_{\text{new}}, X, y) = \mathcal{N}(y_{\text{new}} | x_{\text{new}}^T \hat{\beta}_{\text{post}}, \sigma^2 + x_{\text{new}}^T \Sigma_{\text{post}} x_{\text{new}})
+$$
+
+This gives us a probabilistic prediction that not only provides an estimate of $y_{\text{new}}$, but also the uncertainty of the prediction.
+
+## Implementation
+
+```python
+import numpy as np
+
+class BayesLinearRegression:
+    def __init__(self, tau=1.0, sigma=1.0):
+        self.tau = tau
+        self.sigma = sigma
+        self.beta_post = None
+        self.sigma_post = None
+
+    def fit(self, X, y):
+        # Prior covariance (tau^2 I)
+        tau2_I = self.tau ** 2 * np.eye(X.shape[1])
+
+        # Likelihood covariance (sigma^2 I)
+        sigma2_I = self.sigma ** 2 * np.eye(X.shape[0])
+
+        # Compute the posterior covariance
+        XTX = X.T @ X
+        self.sigma_post = np.linalg.inv(np.linalg.inv(tau2_I) + (1 / self.sigma**2) * XTX)
+
+        # Compute the posterior mean
+        self.beta_post = (1 / self.sigma**2) * self.sigma_post @ X.T @ y
+
+    def predict(self, X_new):
+        # Predictive mean
+        y_pred_mean = X_new @ self.beta_post
+        
+        # Predictive covariance
+        y_pred_cov = self.sigma ** 2 + np.sum(X_new @ self.sigma_post * X_new, axis=1)
+        
+        return y_pred_mean, y_pred_cov
+
+x = np.array([[1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [7, 8]])
+y = np.array([3, 5, 7, 9, 11, 15])
+b_lr = BayesLinearRegression(tau=1.0, sigma=1.0)
+b_lr.fit(x, y)
+y_pred_mean, y_pred_cov = b_lr.predict(np.array([[0, 1]]))
+print(y_pred_mean, y_pred_cov)
+```
