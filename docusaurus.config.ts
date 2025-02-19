@@ -6,13 +6,13 @@ import rehypeKatex from 'rehype-katex';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
-const repo = "notes-template"
+const repo = "classical-ml-basics"
 const ghName = "finger-bone"
-const title = "my site"
+const title = "Classical ML Basics"
 
 const config: Config = {
   title: title,
-  tagline: 'Dinosaurs are cool',
+  tagline: '',
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
