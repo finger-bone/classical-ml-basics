@@ -8,22 +8,22 @@ Bayes Linear Regression is a probabilistic approach that combines Bayes' Theorem
 
 ## Mathematical Formulation
 
-Consider the linear regression model where the target variable $y$ is predicted by a vector of features $x \in \mathbb{R}^p$ (where $p$ is the number of features):
+Consider the linear regression model where the target variable $y$ is predicted by a vector of features $\mathbf{x} \in \mathbb{R}^p$ (where $p$ is the number of features):
 
 $$
-y_i = \beta^T x_i + \epsilon_i
+y_i = \beta^T \mathbf{x}_i + \epsilon_i
 $$
 
 where:
 - $y_i$ is the target value for the $i$-th observation,
-- $x_i = (x_{i1}, x_{i2}, \dots, x_{ip})^T \in \mathbb{R}^p$ is the feature vector for the $i$-th observation,
+- $\mathbf{x}_i = (x_{i1}, x_{i2}, \dots, x_{ip})^T \in \mathbb{R}^p$ is the feature vector for the $i$-th observation,
 - $\beta = (\beta_0, \beta_1, \dots, \beta_p)^T \in \mathbb{R}^{p+1}$ is the vector of unknown regression coefficients (parameters),
 - $\epsilon_i$ is the error term (or residual), which is assumed to be normally distributed: $\epsilon_i \sim \mathcal{N}(0, \sigma^2)$, i.e., errors are independent and identically distributed with mean 0 and variance $\sigma^2$.
 
-Thus, for each observation $i$, the conditional probability of $y_i$ given the feature vector $x_i$ and the parameters $\beta$ is:
+Thus, for each observation $i$, the conditional probability of $y_i$ given the feature vector $\mathbf{x}_i$ and the parameters $\beta$ is:
 
 $$
-P(y_i | x_i, \beta, \sigma^2) = \frac{1}{\sqrt{2 \pi \sigma^2}} \exp\left(-\frac{(y_i - \beta^T x_i)^2}{2 \sigma^2}\right)
+P(y_i | \mathbf{x}_i, \beta, \sigma^2) = \frac{1}{\sqrt{2 \pi \sigma^2}} \exp\left(-\frac{(y_i - \beta^T \mathbf{x}_i)^2}{2 \sigma^2}\right)
 $$
 
 ### Prior Distribution
@@ -38,26 +38,26 @@ where $\tau^2$ is the prior variance, and $I$ is the identity matrix. This prior
 
 ### Likelihood Function
 
-Given the assumption of normally distributed errors, the likelihood function for the observed data $\mathbf{y} = (y_1, y_2, \dots, y_n)^T$ given the feature matrix $x = (x_1^T, x_2^T, \dots, x_n^T)^T$ and parameters $\beta$ is:
+Given the assumption of normally distributed errors, the likelihood function for the observed data $\mathbf{y} = (y_1, y_2, \dots, y_n)^T$ given the feature matrix $\mathbf{X} = (\mathbf{x}_1^T, \mathbf{x}_2^T, \dots, \mathbf{x}_n^T)^T$ and parameters $\beta$ is:
 
 $$
-P(\mathbf{y} | x, \beta, \sigma^2) = \prod_{i=1}^{n} \frac{1}{\sqrt{2 \pi \sigma^2}} \exp\left(-\frac{(y_i - \beta^T x_i)^2}{2 \sigma^2}\right)
+P(\mathbf{y} | \mathbf{X}, \beta, \sigma^2) = \prod_{i=1}^{n} \frac{1}{\sqrt{2 \pi \sigma^2}} \exp\left(-\frac{(y_i - \beta^T \mathbf{x}_i)^2}{2 \sigma^2}\right)
 $$
 
-This represents the likelihood of observing the target values $\mathbf{y}$ given the feature vectors $x$ and parameters $\beta$, with noise variance $\sigma^2$.
+This represents the likelihood of observing the target values $\mathbf{y}$ given the feature vectors $\mathbf{X}$ and parameters $\beta$, with noise variance $\sigma^2$.
 
 ### Posterior Distribution
 
-By Bayes' Theorem, the **posterior distribution** of $\beta$ given the data $(x, \mathbf{y})$ is proportional to the product of the likelihood and the prior:
+By Bayes' Theorem, the **posterior distribution** of $\beta$ given the data $(\mathbf{X}, \mathbf{y})$ is proportional to the product of the likelihood and the prior:
 
 $$
-P(\beta | x, \mathbf{y}, \sigma^2) \propto P(\mathbf{y} | x, \beta, \sigma^2) P(\beta)
+P(\beta | \mathbf{X}, \mathbf{y}, \sigma^2) \propto P(\mathbf{y} | \mathbf{X}, \beta, \sigma^2) P(\beta)
 $$
 
 Substituting the expressions for the likelihood and prior:
 
 $$
-P(\beta | x, \mathbf{y}, \sigma^2) \propto \exp\left(-\frac{1}{2 \sigma^2} \sum_{i=1}^{n} (y_i - \beta^T x_i)^2\right) \exp\left(-\frac{1}{2 \tau^2} \beta^T \beta \right)
+P(\beta | \mathbf{X}, \mathbf{y}, \sigma^2) \propto \exp\left(-\frac{1}{2 \sigma^2} \sum_{i=1}^{n} (y_i - \beta^T \mathbf{x}_i)^2\right) \exp\left(-\frac{1}{2 \tau^2} \beta^T \beta \right)
 $$
 
 ### Posterior Mean and Covariance
@@ -65,36 +65,36 @@ $$
 The posterior distribution of $\beta$ is Gaussian, and the mean and covariance can be computed as follows. Completing the square in the exponent:
 
 $$
-P(\beta | x, \mathbf{y}, \sigma^2) \sim \mathcal{N}(\beta | \hat{\beta}_{\text{post}}, \Sigma_{\text{post}})
+P(\beta | \mathbf{X}, \mathbf{y}, \sigma^2) \sim \mathcal{N}(\beta | \hat{\beta}_{\text{post}}, \Sigma_{\text{post}})
 $$
 
 where the **posterior mean** $\hat{\beta}_{\text{post}}$ is given by:
 
 $$
-\hat{\beta}_{\text{post}} = (\sigma^2 x^T x + \tau^2 I)^{-1} x^T \mathbf{y}
+\hat{\beta}_{\text{post}} = (\sigma^2 \mathbf{X}^T \mathbf{X} + \tau^2 I)^{-1} \mathbf{X}^T \mathbf{y}
 $$
 
 and the **posterior covariance** $\Sigma_{\text{post}}$ is:
 
 $$
-\Sigma_{\text{post}} = (\sigma^2 x^T x + \tau^2 I)^{-1}
+\Sigma_{\text{post}} = (\sigma^2 \mathbf{X}^T \mathbf{X} + \tau^2 I)^{-1}
 $$
 
 ### Prediction
 
-For a new observation $x_{\text{new}}$, the predictive distribution for the target variable $y_{\text{new}}$ is given by:
+For a new observation $\mathbf{x}_{\text{new}}$, the predictive distribution for the target variable $y_{\text{new}}$ is given by:
 
 $$
-P(y_{\text{new}} | x_{\text{new}}, x, \mathbf{y}) = \int P(y_{\text{new}} | x_{\text{new}}, \beta) P(\beta | x, \mathbf{y}, \sigma^2) d\beta
+P(y_{\text{new}} | \mathbf{x}_{\text{new}}, \mathbf{X}, \mathbf{y}) = \int P(y_{\text{new}} | \mathbf{x}_{\text{new}}, \beta) P(\beta | \mathbf{X}, \mathbf{y}, \sigma^2) d\beta
 $$
 
 This integral can be evaluated, leading to the following Gaussian predictive distribution:
 
 $$
-P(y_{\text{new}} | x_{\text{new}}, x, \mathbf{y}) = \mathcal{N}(y_{\text{new}} | x_{\text{new}}^T \hat{\beta}_{\text{post}}, \sigma^2 + x_{\text{new}}^T \Sigma_{\text{post}} x_{\text{new}})
+P(y_{\text{new}} | \mathbf{x}_{\text{new}}, \mathbf{X}, \mathbf{y}) = \mathcal{N}(y_{\text{new}} | \mathbf{x}_{\text{new}}^T \hat{\beta}_{\text{post}}, \sigma^2 + \mathbf{x}_{\text{new}}^T \Sigma_{\text{post}} \mathbf{x}_{\text{new}})
 $$
 
-This provides a probabilistic prediction, giving both the predicted value $x_{\text{new}}^T \hat{\beta}_{\text{post}}$ and the uncertainty in the prediction, represented by the variance $\sigma^2 + x_{\text{new}}^T \Sigma_{\text{post}} x_{\text{new}}$.
+This provides a probabilistic prediction, giving both the predicted value $\mathbf{x}_{\text{new}}^T \hat{\beta}_{\text{post}}$ and the uncertainty in the prediction, represented by the variance $\sigma^2 + \mathbf{x}_{\text{new}}^T \Sigma_{\text{post}} \mathbf{x}_{\text{new}}$.
 
 ## Implementation
 
