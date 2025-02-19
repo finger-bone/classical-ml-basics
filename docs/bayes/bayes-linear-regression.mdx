@@ -4,80 +4,97 @@ sidebar_position: 2
 
 # Bayes Linear Regression
 
-Similar to Bayes Classification, Bayes Linear Regression combines Bayes' Theorem with linear regression. Instead of directly providing point estimates for the model parameters (such as the coefficients in linear regression), this method provides a probabilistic distribution for these parameters, incorporating uncertainty in the model.
+Bayes Linear Regression is a probabilistic approach that combines Bayes' Theorem with linear regression. Instead of providing fixed point estimates for the model parameters (such as the coefficients in linear regression), this method incorporates uncertainty by modeling the parameters as probability distributions.
 
 ## Mathematical Formulation
 
-We begin with a linear regression model for $y$ (the target variable) given $X$ (the feature matrix):
+Consider the linear regression model where the target variable $y$ is predicted by a vector of features $x \in \mathbb{R}^p$ (where $p$ is the number of features):
 
 $$
-y = X \beta + \epsilon
+y_i = \beta^T x_i + \epsilon_i
 $$
 
 where:
-- $y$ is the $n \times 1$ vector of observed values,
-- $X$ is the $n \times p$ matrix of input features (where $n$ is the number of observations, and $p$ is the number of features),
-- $\beta$ is the $p \times 1$ vector of unknown regression coefficients (parameters),
-- $\epsilon$ is the $n \times 1$ vector of errors, typically assumed to be independent and identically distributed from a normal distribution, $\epsilon \sim \mathcal{N}(0, \sigma^2 I)$.
+- $y_i$ is the target value for the $i$-th observation,
+- $x_i = (x_{i1}, x_{i2}, \dots, x_{ip})^T \in \mathbb{R}^p$ is the feature vector for the $i$-th observation,
+- $\beta = (\beta_0, \beta_1, \dots, \beta_p)^T \in \mathbb{R}^{p+1}$ is the vector of unknown regression coefficients (parameters),
+- $\epsilon_i$ is the error term (or residual), which is assumed to be normally distributed: $\epsilon_i \sim \mathcal{N}(0, \sigma^2)$, i.e., errors are independent and identically distributed with mean 0 and variance $\sigma^2$.
+
+Thus, for each observation $i$, the conditional probability of $y_i$ given the feature vector $x_i$ and the parameters $\beta$ is:
+
+$$
+P(y_i | x_i, \beta, \sigma^2) = \frac{1}{\sqrt{2 \pi \sigma^2}} \exp\left(-\frac{(y_i - \beta^T x_i)^2}{2 \sigma^2}\right)
+$$
 
 ### Prior Distribution
-In Bayes Linear Regression, we assume a prior distribution for the parameters $\beta$. A common choice is to assume a **Gaussian prior** on the coefficients:
+
+In Bayes Linear Regression, we assume a prior distribution for the parameters $\beta$. A common choice is to assume a **Gaussian prior** on $\beta$:
 
 $$
-\beta \sim \mathcal{N}(0, \tau^2 I)
+\beta \sim \mathcal{N}(\mathbf{0}, \tau^2 I)
 $$
 
-where $\tau^2$ is the prior variance that controls the uncertainty about the parameters. This prior expresses the belief that the coefficients $\beta$ are likely to be near zero but with some variability.
+where $\tau^2$ is the prior variance, and $I$ is the identity matrix. This prior distribution expresses the belief that the coefficients $\beta$ are likely to be close to zero, but with some uncertainty.
 
 ### Likelihood Function
-Given the assumption of normally distributed errors, the likelihood function for the observed data $y$ given $X$ and $\beta$ is:
+
+Given the assumption of normally distributed errors, the likelihood function for the observed data $\mathbf{y} = (y_1, y_2, \dots, y_n)^T$ given the feature matrix $x = (x_1^T, x_2^T, \dots, x_n^T)^T$ and parameters $\beta$ is:
 
 $$
-p(y | X, \beta, \sigma^2) = \mathcal{N}(y | X\beta, \sigma^2 I)
+P(\mathbf{y} | x, \beta, \sigma^2) = \prod_{i=1}^{n} \frac{1}{\sqrt{2 \pi \sigma^2}} \exp\left(-\frac{(y_i - \beta^T x_i)^2}{2 \sigma^2}\right)
 $$
 
-This represents the probability of observing $y$ given the inputs $X$ and the parameters $\beta$, with noise variance $\sigma^2$.
+This represents the likelihood of observing the target values $\mathbf{y}$ given the feature vectors $x$ and parameters $\beta$, with noise variance $\sigma^2$.
 
 ### Posterior Distribution
-By Bayes' Theorem, the **posterior distribution** of $\beta$ given the data $(X, y)$ is proportional to the product of the prior and the likelihood:
+
+By Bayes' Theorem, the **posterior distribution** of $\beta$ given the data $(x, \mathbf{y})$ is proportional to the product of the likelihood and the prior:
 
 $$
-p(\beta | X, y) \propto p(y | X, \beta, \sigma^2) p(\beta)
+P(\beta | x, \mathbf{y}, \sigma^2) \propto P(\mathbf{y} | x, \beta, \sigma^2) P(\beta)
 $$
 
 Substituting the expressions for the likelihood and prior:
 
 $$
-p(\beta | X, y) \propto \exp\left(-\frac{1}{2\sigma^2} (y - X\beta)^T(y - X\beta)\right) \exp\left(-\frac{1}{2\tau^2} \beta^T \beta \right)
+P(\beta | x, \mathbf{y}, \sigma^2) \propto \exp\left(-\frac{1}{2 \sigma^2} \sum_{i=1}^{n} (y_i - \beta^T x_i)^2\right) \exp\left(-\frac{1}{2 \tau^2} \beta^T \beta \right)
 $$
-
-This is a Gaussian distribution with the following mean and covariance.
 
 ### Posterior Mean and Covariance
-After completing the algebra, we arrive at the following **posterior distribution** for $\beta$:
+
+The posterior distribution of $\beta$ is Gaussian, and the mean and covariance can be computed as follows. Completing the square in the exponent:
 
 $$
-p(\beta | X, y) = \mathcal{N}(\beta | \hat{\beta}_{\text{post}}, \Sigma_{\text{post}})
+P(\beta | x, \mathbf{y}, \sigma^2) \sim \mathcal{N}(\beta | \hat{\beta}_{\text{post}}, \Sigma_{\text{post}})
 $$
 
-where:
-- $\hat{\beta}_{\text{post}} = (\sigma^2 X^T X + \tau^2 I)^{-1} X^T y$ is the **posterior mean**, which is a weighted combination of the least-squares estimate and the prior information,
-- $\Sigma_{\text{post}} = (\sigma^2 X^T X + \tau^2 I)^{-1}$ is the **posterior covariance**, which indicates the uncertainty about the regression parameters after observing the data.
+where the **posterior mean** $\hat{\beta}_{\text{post}}$ is given by:
+
+$$
+\hat{\beta}_{\text{post}} = (\sigma^2 x^T x + \tau^2 I)^{-1} x^T \mathbf{y}
+$$
+
+and the **posterior covariance** $\Sigma_{\text{post}}$ is:
+
+$$
+\Sigma_{\text{post}} = (\sigma^2 x^T x + \tau^2 I)^{-1}
+$$
 
 ### Prediction
-The predictive distribution for a new observation $x_{\text{new}}$ is given by:
+
+For a new observation $x_{\text{new}}$, the predictive distribution for the target variable $y_{\text{new}}$ is given by:
 
 $$
-p(y_{\text{new}} | x_{\text{new}}, X, y) = \int p(y_{\text{new}} | x_{\text{new}}, \beta) p(\beta | X, y) d\beta
+P(y_{\text{new}} | x_{\text{new}}, x, \mathbf{y}) = \int P(y_{\text{new}} | x_{\text{new}}, \beta) P(\beta | x, \mathbf{y}, \sigma^2) d\beta
 $$
 
-This integral can be evaluated, leading to a **Gaussian** distribution for the prediction:
+This integral can be evaluated, leading to the following Gaussian predictive distribution:
 
 $$
-p(y_{\text{new}} | x_{\text{new}}, X, y) = \mathcal{N}(y_{\text{new}} | x_{\text{new}}^T \hat{\beta}_{\text{post}}, \sigma^2 + x_{\text{new}}^T \Sigma_{\text{post}} x_{\text{new}})
+P(y_{\text{new}} | x_{\text{new}}, x, \mathbf{y}) = \mathcal{N}(y_{\text{new}} | x_{\text{new}}^T \hat{\beta}_{\text{post}}, \sigma^2 + x_{\text{new}}^T \Sigma_{\text{post}} x_{\text{new}})
 $$
 
-This gives us a probabilistic prediction that not only provides an estimate of $y_{\text{new}}$, but also the uncertainty of the prediction.
+This provides a probabilistic prediction, giving both the predicted value $x_{\text{new}}^T \hat{\beta}_{\text{post}}$ and the uncertainty in the prediction, represented by the variance $\sigma^2 + x_{\text{new}}^T \Sigma_{\text{post}} x_{\text{new}}$.
 
 ## Implementation
 
