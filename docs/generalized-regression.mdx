@@ -1,0 +1,223 @@
+---
+sidebar_position: 1
+---
+
+# Generalized Linear Regression
+
+Regression solves the following question,
+
+Given,
+
+$$
+x_i \in \mathbb{R}^n, y_i \in \mathbb{R}, i = 1, 2, \ldots, n
+$$
+
+And a train dataset,
+
+$$
+\mathcal{D} = \{(x_1, y_1), (x_2, y_2), \ldots, (x_n, y_n)\}
+$$
+
+Find the best fit $f$ for,
+
+$$
+\hat{y} = f(x)
+$$
+
+By best fit, we typically mean to minimize a loss value.
+
+$$
+f = min_{f \in \mathcal{F}} \frac{1}{n}  \sum_{i=1}^{n} L(y_i, f(x_i))
+$$
+
+Generalized Linear Regression mainly contains, the linear regression, logistic regression, and regularized regression (L1, L2, Elastic Net, etc). They are all variations of the linear regression.
+
+## Linear Regression
+
+Linear regression finds the best fit $f$ in the linear function space. It usually uses MSE (Mean Squared Error) as the loss function.
+
+Suppose,
+
+$$
+\hat{y} = \hat{w}^Tx+\hat{b}
+$$
+
+:::note
+
+You may see the following in other books,
+
+$$
+\hat{y} = \hat{w}^Tx
+$$
+
+This is because they use homogeneous coordinates. This form adds an extra dimension to $w$ and $x$, and for this extra dimension, the value of $x$ is always one.
+
+This equals to,
+
+$$
+\hat{y} = \hat{(w, b)}^T\hat{(x, 1)}
+$$
+
+Which is exactly,
+
+$$
+\hat{y} = \hat{w}^Tx+\hat{b}
+$$
+
+This may simply calculation in some cases.
+
+:::
+
+Then we want,
+
+$$
+(\hat{w}^T, \hat{b}) = argmin_{(w^T, b)} \frac{1}{n} \sum_{i=1}^{n} (y_i - (w^Tx_i + b))^2
+$$
+
+There are many ways to solve this. We simply use partial derivatives,
+
+Note,
+
+$$
+L = \frac{1}{n} \sum_{i=1}^{n} (y_i - (w^Tx_i + b))^2
+$$
+
+Then,
+
+$$
+\frac{\partial L}{\partial w^T} = \frac{1}{n} \sum_{i=1}^{n} -2x_i(y_i - (w^Tx_i + b)) = 0
+$$
+
+$$
+\frac{\partial L}{\partial b} = \frac{1}{n} \sum_{i=1}^{n} -2(y_i - (w^Tx_i + b)) = 0
+$$
+
+We usually note,
+
+$$
+\overline{v}  = \frac{1}{n} \sum_{i=1}^{n} v_i
+$$
+
+Then,
+
+$$
+w^T \overline{xx} + b\overline{x} = \overline{yx}
+$$
+
+$$
+w^T\overline{x} + b = \overline{y}
+$$
+
+Please note that $\overline{xx}$ is a tensor.
+
+In the end,
+
+$$
+w^T = ({\overline{xy} - \overline{x} \; \overline{y}})(\overline{xx} - \overline{x}\; \overline{x})^{-1}
+$$
+
+$$
+b = \overline{y} - w^T\overline{x}
+$$
+
+We adjust the indices to make it more suitable for matrix calculations. We always use abstract notation and einstein summation convention.
+
+$$
+w_{a} = ({\overline{x^b y} - \overline{x^b} \; \overline{y}})(\overline{x^a x^b} - \overline{x^a}\; \overline{x^b})^{-1} \\
+= ({\overline{x_b y} - \overline{x_b} \; \overline{y}})(\overline{x^a x_b} - \overline{x^a}\; \overline{x_b})^{-1} \\
+$$
+
+Rewrite it in matrix form,
+
+$$
+w^T = ({\overline{x^Ty} - \overline{x^T} \; \overline{y}})(\overline{xx^T} - \overline{x}\; \overline{x}^T)^{-1}
+$$
+
+:::note
+
+For homogeneous coordinates,
+
+$$
+w^T = (\overline{xx^T}) ^ {-1} \overline{yx}
+$$
+
+:::
+
+Using Numpy to implement this,
+
+```python
+import numpy as np
+
+def linear_regression(x, y):
+    x = np.array(x)
+    y = np.array(y)
+    xx = np.einsum('ij,ik->jk', x, x)
+    xy = np.einsum('ij,i->j', x, y)
+    x = np.einsum('ij->j', x)
+    y = np.einsum('i->', y)
+    w = np.linalg.inv(xx - np.outer(x, x)) @ (xy - x * y)
+    b = y - w @ x
+    return w, b
+
+def predict(x, w, b):
+    x = np.array(x)
+    return x @ w + b
+
+train_x = [[1, 2], [2, 3], [3, 4], [4, 5], [5, 6]]
+train_y = [3, 5, 7, 9, 11]
+w, b = linear_regression(train_x, train_y)
+print(w, b)
+print(predict([[6, 7], [7, 8]], w, b))
+```
+
+## Logistic Regression
+
+Logistic regression is a bit more robust than linear regression. It works good on data that seems linear yet not linear enough for linear regression.
+
+Logistic Regression use function space,
+
+$$
+\hat{y} = \sigma(w^Tx + b)
+$$
+
+Where $\sigma(z) = \frac{1}{1+e^{-z}}$ is the sigmoid function.
+
+:::note
+
+Sigmoid function has some special properties,
+
+$\sigma'(z) = \sigma(z)(1-\sigma(z))$
+
+$\sigma(-z) = 1 - \sigma(z)$
+
+$\sigma^{-1}(z) = \log(\frac{z}{1-z})$
+
+:::
+
+To solve logistic regression, we just convert it to a linear regression problem.
+
+$$
+\sigma^{-1}(\hat{y}) = w^Tx + b
+$$
+
+## Regularized Regression
+
+Sometimes, we add extra regularization terms to loss function to reduce overfit and the effect of outliers.
+
+If we add L1 regulation, that is,
+
+$$
+L = \frac{1}{n} \sum_{i=1}^{n} (y_i - (w^Tx_i + b))^2 + \lambda ||w||_1
+$$
+
+This would make the weight more sparse, which is good for feature selection.
+
+If we add L2 regulation, that is,
+
+$$
+L = \frac{1}{n} \sum_{i=1}^{n} (y_i - (w^T x_i + b))^2 + \lambda ||w||_2^2
+$$
+
+This would make the weight smaller, which is good for reducing overfit.
+
+Linear regression with L1 regularization is called Lasso regression, and with L2 regularization is called Ridge regression. If we combine them, it is called an Elastic Net.

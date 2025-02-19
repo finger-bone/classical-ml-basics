@@ -1,0 +1,16 @@
+[project]
+authors = ["Zend <zendwang040302@outlook.com>"]
+channels = ["conda-forge"]
+name = "code"
+platforms = ["osx-arm64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+python = "3.12.*"
+
+[pypi-dependencies]
+numpy = ">=2.2.3, <3"
+jupyter = ">=1.1.1, <2"
+notebook = ">=7.3.2, <8"
