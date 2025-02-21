@@ -3,3 +3,197 @@ sidebar_position: 2
 ---
 
 # LDA
+
+Different from PCA, LDA (Linear Discriminant Analysis) wants to make data with same label clustered together in the low dimension space. LDA assumes that the original data is classified based on the mean value, and different types of value have the same variance. Thus, LDA performs better when the original data is well separated by the mean value.
+
+Assume we have,
+
+$$
+\mathcal{D} = \{(x_1, y_1), (x_2, y_2), \ldots, (x_n, y_n)\}
+$$
+
+$y_i \in \mathbb{Y}$ where $\mathbb{Y}$ is the set of all possible labels.
+
+We calculate the mean and variance for each label $j \in \mathbb{Y}$
+
+$$
+\mu_j = \frac{1}{n_j} \sum_{i=1}^{n} x_i \mathbb{I}(y_i = j)
+$$
+
+$$
+\sigma_j^2 = \frac{1}{n_j} \sum_{i=1}^{n} (x_i - \mu_j)(x_i - \mu_j)^T \mathbb{I}(y_i = j)
+$$
+
+Please note that $\mu_j$ is the mean vector and $\sigma_j^2$ is the covariance matrix.
+
+We also use a the following formula to measure the within-class variance,
+
+$$
+\Sigma_w^2 = \frac{1}{n} \sum_{j=1}^{|\mathbb{Y}|} n_j \sigma_j^2
+$$
+
+And we use the following formula to measure the between-class variance,
+
+$$
+\Sigma_b^2 = \frac{1}{n} \sum_{j=1}^{ | \mathbb{Y} | } n_j (\mu_j - \overline{x}) (\mu_j - \overline{x})^T
+$$
+
+Where $\overline{x}$ is the mean of all vectors.
+
+The variance of the whole dataset is,
+
+$$
+\Sigma^2 = \frac{1}{n} \sum_{i=1}^n (x_i - \bar{x}) (x_i - \bar{x})^T
+$$
+
+We can prove that,
+
+$$
+\Sigma^2 = \Sigma_w^2 + \Sigma_b^2
+$$
+
+We use the following property,
+
+$$
+\sigma^2(x) = \mathbb{E}(xx^T) - \mathbb{E}(x)\mathbb{E}(x)^T
+$$
+
+Thus,
+
+$$
+\Sigma_w^2 + \Sigma_b^2 \\
+= \frac{1}{n} \sum_{i=1}^{n} ((x_i - \mu_j) (x_i - \mu_j)^T + (\mu_j - \overline{x}) (\mu_j - \overline{x})^T)\\
+= \frac{1}{n} \sum_{i=1}^{n} (x_ix_i^T + \overline{x} \; \overline{x}^T - \mu_j x_i^T -  x_i \mu_j^T - \mu_j \overline{x}^T - \overline{x} \mu_j^T +2 \mu_j\mu_j^T)\\
+= \mathbb{E_i}(x_ix_i^T) + \overline{x} \; \overline{x}^T - \mathbb{E_i}(x_i \mu_j^T) -  \mathbb{E_i}(\mu_j x_i^T) - \mathbb{E_i}(\mu_j \overline{x}^T) - \mathbb{E_i}(\overline{x} \mu_j^T) + 2 \mathbb{E_i}(\mu_j\mu_j^T)\\
+$$
+
+Simplify term by term:
+
+$$
+\frac{1}{n} \sum_{i=1}^n x_i x_i^T = \mathbb{E}(x x^T)
+$$ 
+
+The terms $-x_i \mu_j^T$ and $-\mu_j x_i^T$ combine to: 
+
+$$
+-\frac{1}{n} \sum_{j} n_j (\mu_j \mu_j^T + \mu_j \mu_j^T) = -\frac{2}{n} \sum_{j} n_j \mu_j \mu_j^T
+$$
+
+This is valid because, for each cluster $j$, $\mu_j$ is a constant, and its indices $\mathbb{G}_j$,
+
+$$
+\sum_{i\in\mathbb{G}_j} -x_i \mu_j^T = -n_j \mu_j \mu_j^T
+$$
+
+The same goes for $-\mu_j x_i^T$.
+
+The terms $-\mu_j \overline{x}^T$ and $-\overline{x} \mu_j^T$ combine to:  
+    
+$$
+-\frac{1}{n} \sum_{j} n_j (\mu_j \overline{x}^T + \overline{x} \mu_j^T) = -2 \overline{x} \overline{x}^T
+$$  
+
+The terms $\mu_j \mu_j^T$ and $\overline{x} \overline{x}^T$ simplify using the identity $\sum_{j} n_j \mu_j = n \overline{x}$:  
+    
+$$
+\frac{1}{n} \left( 2 \sum_{j} n_j \mu_j \mu_j^T + n \overline{x} \overline{x}^T \right) = 2 \mathbb{E}(\mu_j \mu_j^T) + \overline{x} \overline{x}^T
+$$  
+
+In all,
+
+$$
+\Sigma_w^2 + \Sigma_b^2 \\ = \mathbb{E}(x x^T) - 2 \mathbb{E}(\mu_j \mu_j^T) + 2 \mathbb{E}(\mu_j \mu_j^T) - 2 \overline{x} \overline{x}^T + \overline{x} \overline{x}^T \\
+= \mathbb{E}(x x^T) - \overline{x} \overline{x}^T \\
+= \Sigma^2
+$$
+
+However, please pay attention that, in all the calculation above, the presume every element is already labeled. Thus there is no variable. However, let's back to the main track, if we project the original data onto a low-dimensional space, that is, a non-square projection matrix $W^T$ that could maximize the between-class variance after projection, and minimize the within-class variance.
+
+For convenience, we use $W^T$ so that every column vector is a new basis.
+
+That is,
+
+$$
+x' = W^T x
+$$
+
+$$
+\mu_j' = W^T \mu_j
+$$
+
+$$
+\sigma_j'^2 = W^T \sigma_j^2 W
+$$
+
+$$
+\Sigma_b'^2 = W^T \Sigma_b^2 W
+$$
+
+$$
+\Sigma_w'^2 = W^T \Sigma_w^2 W
+$$
+
+We would like to maximize the $\Sigma_b'^2$, and minimize the $\Sigma_w'^2$. However, they are matrices, not scalars, so we cannot directly compare them. LDA choose the following target function,
+
+$$
+J(W^T) = ||{\Sigma_b'^2}^{-1}\Sigma_w'^2||_{F}
+$$
+
+:::tip
+
+The $||M||_{F}$ is the Frobenius norm, defined as,
+
+$$
+||M||_{F} = \sqrt{\sum_{i,j} M_{i,j}^2}
+$$
+
+Which, if we define $\lambda_i$ as the eigenvalues of $M$, then,
+
+$$
+||M||_{F} = \sqrt{\sum_{i} \lambda_i^2}
+$$
+
+:::
+
+Another point to consider is that, we must restrain all column vector (the new basis) to have a unit norm. Otherwise, the result can be arbitrarily small or large because you can add a scale factor to the row vector.
+
+That is to say,
+
+$$
+W^T W = 1
+$$
+
+We suppose, $w$ is a unit eigenvector, so,
+
+$$
+w^T {\Sigma_b'^2}^{-1}\Sigma_w'^2 w = \lambda^2 \\ 
+= w^T W^T ({\Sigma_b^2}^{-1}\Sigma_w^2) W w\\
+= (W^T w)^T ({\Sigma_b^2}^{-1}\Sigma_w^2) (W^T w)
+\\
+$$
+
+That is to say, $W^T w$ is the eigenvector of $({\Sigma_b^2}^{-1}\Sigma_w^2)$.
+
+So,
+
+$$
+J(W^T) = ||{\Sigma_b'^2}^{-1}\Sigma_w'^2||_{F} = \sqrt{\sum_{i \in \mathbb{L}} \lambda_i^2}
+$$
+
+Where $\mathbb{L}$ is a set of eigenvalues chosen from ${\Sigma_b^2}^{-1}\Sigma_w^2$. $|\mathbb{L}|$ equals to the rank of $W$.
+
+So obviously, if we want to minimize $J(W^T)$, we simply use the smallest eigenvalues of ${\Sigma_b^2}^{-1}\Sigma_w^2$.
+
+And because $w$ is an unit vector, we can always use, $w_i = e_i$. And thus, since $W^T w$ is the eignenvector of ${\Sigma_b^2}^{-1}\Sigma_w^2$, $W^T$ has each of its column vector as an eignenvector of ${\Sigma_b^2}^{-1}\Sigma_w^2$.
+
+:::note
+
+That was a long proof. But the result is simple- we find $k$ smallest eigenvalues of ${\Sigma_b^2}^{-1}\Sigma_w^2$, stack them to get $W^T$. And after performing,
+
+$$
+X' = W^T X
+$$
+
+We get the LDA result.
+
+:::

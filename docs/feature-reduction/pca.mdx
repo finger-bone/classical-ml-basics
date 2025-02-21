@@ -17,18 +17,28 @@ We would like to retain the dimension that captures the most variance in the dat
 Consider the covariance matrix, $C = (X - \overline{X})^T(X - \overline{X})$ where $\overline{X} = (\overline{x}, \overline{x}, \ldots, \overline{x})^T$. Because we want maximum variance for each dimension, we can perform an eigendecomposition of the covariance matrix.
 
 $$
-C = V \Lambda V^T
+C = V^T \Lambda V
 $$
 
-We will use $V$ as the new basis for each $x$ data vector. So their variance can be measured by their eigenvalues. Those with higher eigenvalues are the principal components.
+Now, if $v$ is an eigenvector, if the original data has greater variance along $v$, it will have a greater eigenvalue. We can choose ones that have the largest eigenvalues, then,
 
-We can set a threshold or set a fixed number of principal components to keep. Then we can finish the feature reduction.
+$$
+V = (v_1, v_2, \ldots, v_k)^T
+$$
+
+Then we project $X$ to this reduced eigenspace,
+
+$$
+X' = X V
+$$
+
+Thus accomplishing the task of choosing the important basis (the principal components) of the dataset.
 
 :::info
 
-The above process can also be seen as SVD on the dataset matrix $X$.
+The above process can also be seen as SVD on the dataset matrix $X - \overline{X}$.
 
-From the SVD perspective, the principal components are the left singular vectors of $X$. The eigenvalues of the covariance matrix are the square of the singular values of $X$. We look for the singular vectors that has the largest absolute singular values, then cast the data into the reduced singular vector space.
+From the SVD perspective, the principal components are the left singular vectors of $X - \overline{X}$. The eigenvalues of the covariance matrix are the square of the singular values of $X - \overline{X}$. We look for the singular vectors that has the largest absolute singular values, then cast the data into the reduced singular vector space.
 
 :::
 
@@ -40,7 +50,7 @@ $$
 X = U \Sigma V^T
 $$
 
-Where $U$ and $V$ are orthogonal matrices and $\Sigma$ is a diagonal matrix. This is a natural extension of the eigendecomposition of a square matrix.
+Where $U$ and $V$ are orthogonal matrices and $\Sigma$ is a diagonal (maybe not square) matrix. This is a natural extension of the eigendecomposition of a square matrix.
 
 $U$ and $V$ are the left and right singular vectors of $X$ respectively. $\Sigma$ is the singular values of $X$. For a square matrix, the singular values are the eigenvalues.
 
