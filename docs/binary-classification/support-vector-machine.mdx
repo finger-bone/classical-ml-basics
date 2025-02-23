@@ -186,6 +186,30 @@ s.t. \; \frac{y_i(w^T x_i + b)}{\epsilon ||w^T||_2} \geq 1 - \xi_i \\
 \epsilon \leq \epsilon_0
 $$
 
+:::tip
+
+We let,
+
+$$
+\max(0, 1 - \frac{y_i(w^T x_i + b)}{\epsilon ||w^T||_2}) = \xi_i
+$$
+
+Thus,
+
+$$
+\xi_i \geq 0
+$$
+
+And
+
+$$
+\xi_i \geq (1 - \frac{y_i(w^T x_i + b)}{\epsilon ||w^T||_2})
+$$
+
+With this, we can convert $\max$ or $\min$ function into free variables with two extra constraints.
+
+:::
+
 :::info
 
 This form in my note looks very different from other forms you may see in the textbook, which is,
@@ -319,6 +343,13 @@ $$
 The other part of the SVM algorithm remains the same.
 
 However, because we eventually will cast the high dimensional data back to the original space, we can use the kernel trick to avoid the explicit calculation of $\phi(x)$. That is, we define a new inner product, $K(x, x') = \phi(x)^T \phi(x')$. This is called a kernel function.
+
+A kernel function is a map to a higher-dimensional inner product, and thus it must satisfy all the properties of an inner product.
+
+- Symmetric: $K(x, x') = K(x', x)$
+- Positive semi-definite: $K(x, x) \geq 0$
+- Linear for the second argument: $K(x, c x') = c K(x, x')$
+- Conjugate $K(x, c x') = K(c^{\dagger} x, x')$
 
 Then, with everything else remains the same, when we calculate the inner product, we use the non-linear kernel function instead of the original inner product.
 
